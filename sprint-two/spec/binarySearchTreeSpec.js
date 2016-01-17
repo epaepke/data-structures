@@ -2,7 +2,7 @@ describe('binarySearchTree', function() {
   var binarySearchTree;
 
   beforeEach(function() {
-    binarySearchTree = BinarySearchTree(5);
+    binarySearchTree = new BinarySearchTree(5);
   });
 
   it('should have methods named "insert", "contains", and "depthFirstLog', function() {
@@ -40,7 +40,7 @@ describe('binarySearchTree', function() {
   it('should execute a callback on every value in a tree using "breadthFirstLog"', function(){
       var array = [];
       var func = function(value){ array.push(value); };
-      binarySearchTree = BinarySearchTree(2);
+      binarySearchTree = new BinarySearchTree(2);
       binarySearchTree.insert(4);
       binarySearchTree.insert(7);
       binarySearchTree.insert(3);
@@ -52,7 +52,23 @@ describe('binarySearchTree', function() {
       expect(array).to.eql([2,-1,4,-2,1,3,7,9]);
     });
 
-  it('should execute a callback on every value in a tree using "breadthFirstLog"', function(){
-    
+  it('should resize if tree is unbalanced', function(){
+    var array = [];
+    var func = function(value){ array.push(value); };
+    binarySearchTree = new BinarySearchTree(2);
+    binarySearchTree.insert(4);
+    binarySearchTree.insert(7);
+    binarySearchTree.insert(3);
+    binarySearchTree.insert(-1);
+    binarySearchTree.insert(9);
+    binarySearchTree.insert(1);
+    binarySearchTree.insert(-2);
+    binarySearchTree.insert(10);
+    binarySearchTree.insert(11);
+    binarySearchTree.insert(12);
+    // console.log(binarySearchTree._balanceCheck(binarySearchTree));
+    binarySearchTree.breadthFirstLog(func);
+    console.log(array);
+    expect(array).to.eql([1,2,3]);
   });
 });

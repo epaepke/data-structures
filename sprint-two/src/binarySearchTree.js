@@ -1,32 +1,31 @@
 var BinarySearchTree = function(value) {
-  var newBTree = Object.create(bTreeMethods);
-  newBTree.value = value;
- 
-  var left;
-  var right;
-
-  return newBTree;
+  this.left;
+  this.right;
+  this._depth = 0;
+  this.value = value;
 };
 
-var bTreeMethods = {};
+BinarySearchTree.prototype.size = 0;
 
-bTreeMethods.insert = function(value) {
-  if (value > this.value) {
-    if (this.right) {
-      this.right.insert(value);
+BinarySearchTree.prototype.insert = function(value) {
+  function inputNode(node) {
+    var child = value > node.value ? 'right' : 'left'; 
+    if (node[child]) {
+      inputNode(node[child]);
     } else {
-      this.right = new BinarySearchTree(value);
-    }
-  } else {
-    if (this.left) {
-      this.left.insert(value);
-    } else {
-      this.left = new BinarySearchTree(value);
+      BinarySearchTree.prototype.size++;
+      node[child] = new BinarySearchTree(value);
+      node[child]._depth = node._depth + 1;
     }
   }
+
+  inputNode(this);
+  if(this.size > 5 && !this._balanceCheck(this)) {
+    this._balanceTree();
+  } 
 };
 
-bTreeMethods.contains = function(target) {
+BinarySearchTree.prototype.contains = function(target) {
   if (this.value === target) {
     return true;
   } 
@@ -39,10 +38,10 @@ bTreeMethods.contains = function(target) {
   }
 };
 
-bTreeMethods.depthFirstLog = function(func) {
+BinarySearchTree.prototype.depthFirstLog = function(func) {
   func(this.value);
   if (this.left) {
-    this.left.depthFirstLog(func);
+    this.left.depthFirstLog(func);                                                                                                                                
   }
   if (this.right) {
     this.right 
@@ -50,9 +49,8 @@ bTreeMethods.depthFirstLog = function(func) {
   }
 };
 
-bTreeMethods.breadthFirstLog = function(func) {
+BinarySearchTree.prototype.breadthFirstLog = function(func) {
   var breadthFirstTraverse = function(node) {
-    console.log(node);
     func(node.value);
     if (node.left) {
       queue.push(node.left);
@@ -70,32 +68,65 @@ bTreeMethods.breadthFirstLog = function(func) {
   breadthFirstTraverse(queue[0]);
 };
 
-bTreeMethods.balanceTree = function() {
-  var pseudoNode = Tree();
+BinarySearchTree.prototype._balanceTree = function() {
+  // Adapted Day-Stout-Warren tree balancing algorithm
+  var pseudoNode = new BinarySearchTree(undefined);
   pseudoNode.right = this;
-  var x = pseudoNode.retrieveSortedList();
-  while (x) {
-    console.log(x.value);
-    x = x.right;
+  var root = pseudoNode._retrieveSortedList();
+  var leaves = this.size + 1 - Math.pow(2, Math.floor(Math.log2(this.size + 1)));
+  root._listToTree(leaves);
+  var tempSize = this.size - leaves;
+  while (tempSize > 1) {
+    root._listToTree(Math.floor(tempSize / 2));
+    tempSize = Math.floor(tempSize / 2);
   }
 };
 
-bTreeMethods.retrieveSortedList = function() {
-  // var tail = this;
+BinarySearchTree.prototype._retrieveSortedList = function() {
+  var tail = this;
   var rest = this.right;
   while (rest) {
     if (!rest.left) {
-      // tail = rest;
+      tail = rest;
       rest = rest.right;
     } else {
       var temp = rest.left;
       rest.left = temp.right;
       temp.right = rest;
       rest = temp;
-      // tail.right = rest;
+      tail.right = rest;
     }
   }
   return this;
+};
+
+BinarySearchTree.prototype._listToTree = function(count) {
+  var pointer = this;
+  for (var i = 0; i < count; i++) {
+    var child = pointer.right;
+    pointer.right = child.right;
+    pointer = child.right;
+    child.right = pointer.left;
+    pointer.left = child;
+  }
+};
+
+BinarySearchTree.prototype._balanceCheck = function(node) {
+  if (!node) {
+    return 1;
+  }
+  var left = this._balanceCheck(node.left);
+  var right = this._balanceCheck(node.right);
+
+  if (left && right) {
+    if (left / right > 2 || left / right < 0.5) {
+      return false;
+    } else {
+      return 1 + Math.max(left, right);
+    }
+  } else {
+    return false;
+  }
 };
 
 /*
